@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="在浏览器本地打开 STEP 模型，自由旋转并导出透明 PNG 或 JPG。">
+  <meta name="theme-color" content="#f4f6f5">
+  <title>OpenStepShot · STEP 视图导出</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2319322b'/%3E%3Cpath d='m16 6 9 5v10l-9 5-9-5V11l9-5Zm-9 5 9 5 9-5m-9 5v10' fill='none' stroke='%23a4edbe' stroke-width='1.5'/%3E%3C/svg%3E">
+</head>
+<body>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 2.8 8 4.6v9.2l-8 4.6-8-4.6V7.4l8-4.6Z M4 7.4l8 4.6 8-4.6M12 12v9.2m-4-16.1 8 4.6"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9Zm0 0v7h7M8 15h8m-8 3h5"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M21 11V8a2 2 0 0 0-2-2h-7l-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h13a2 2 0 0 0 1.9-1.4l2-6A2 2 0 0 0 20 10H7l-2.5 8"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4"/></symbol>
+    <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5m6-3h4m-2-2v4"/></symbol>
+    <symbol id="i-mouse" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v3"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3m-4 4v2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-cube"/></svg></span>
+        <span>OpenStepShot</span>
+      </div>
+      <span class="local-status"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg> 本地处理</span>
+      <a class="github-link" id="github-link" href="https://github.com/geekheart/OpenStepShot" target="_blank" rel="noopener noreferrer" aria-label="在 GitHub 查看 OpenStepShot 源码" title="在 GitHub 查看 OpenStepShot 源码">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true"><path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.53v-2.07c-3.09.67-3.74-1.31-3.74-1.31-.5-1.29-1.23-1.63-1.23-1.63-1.01-.69.08-.68.08-.68 1.12.08 1.71 1.15 1.71 1.15.99 1.7 2.6 1.21 3.23.93.1-.72.39-1.21.71-1.49-2.47-.28-5.07-1.24-5.07-5.49 0-1.21.43-2.2 1.14-2.98-.11-.28-.49-1.41.11-2.93 0 0 .93-.3 3.05 1.14a10.63 10.63 0 0 1 5.55 0c2.12-1.44 3.05-1.14 3.05-1.14.6 1.52.22 2.65.11 2.93.71.78 1.14 1.77 1.14 2.98 0 4.26-2.6 5.08-5.08 5.48.4.35.76 1.02.76 2.06V22c0 .29.2.64.77.53A11.1 11.1 0 0 0 12 .9Z"/></svg>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <main class="shell">
+    <div class="page-heading">
+      <div>
+        <h1>STEP 视图导出</h1>
+        <p>选好模型视角，一键导出 PNG 或 JPG。</p>
+      </div>
+      <button class="button button-outline" id="open-file" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#i-folder"/></svg> 打开 STEP
+      </button>
+      <input id="file-input" type="file" accept=".step,.stp" aria-label="打开 STEP 文件" hidden>
+    </div>
+
+    <div class="workspace">
+      <section class="viewport" aria-label="模型预览">
+        <div class="viewport-header">
+          <div class="file-summary">
+            <svg class="icon" aria-hidden="true"><use href="#i-file"/></svg>
+            <span id="file-name">尚未导入模型</span>
+          </div>
+          <div class="viewport-actions">
+            <span id="view-label">等轴测</span>
+            <button type="button" class="fit-button" id="fit-view" title="适配画面" disabled>
+              <svg class="icon" aria-hidden="true"><use href="#i-fit"/></svg><span>适配</span>
+            </button>
+          </div>
+        </div>
+
+        <p class="notice" id="notice" role="status" aria-live="polite" hidden></p>
+        <div id="view-area" class="view-area">
+          <div id="image-stage" class="image-stage" hidden>
+            <div id="render-target" class="render-target"></div>
+          </div>
+
+          <div id="empty-view" class="empty-view">
+            <div class="empty-mark" aria-hidden="true">
+              <svg viewBox="0 0 104 104" width="104" height="104" fill="none">
+                <path d="M11 27V11h16m50 0h16v16m0 50v16H77m-50 0H11V77" stroke="#527166" stroke-width="1.2"/>
+                <path d="m52 23 25 14.5v29L52 81 27 66.5v-29Z" fill="#263e36"/>
+                <path d="m52 52 25-14.5v29L52 81Z" fill="#1e302b"/>
+                <path d="m52 23 25 14.5v29L52 81 27 66.5v-29L52 23Zm0 29 25-14.5M52 52 27 37.5M52 52v29" stroke="#9fe7b8" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="m40 30 25 14.5m-25 0v29m25-29v29m-38-22L52 66l25-14.5" stroke="#689787" stroke-width="1" opacity=".7"/>
+              </svg>
+            </div>
+            <h2>将 STEP 文件拖到这里</h2>
+            <p>支持 .step 和 .stp</p>
+            <div class="empty-actions">
+              <button type="button" id="empty-open" class="button button-stage">
+                <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg> 选择文件
+              </button>
+              <button type="button" id="open-example" class="button button-example">试用示例</button>
+            </div>
+          </div>
+
+          <div id="loading-view" class="loading-view" role="status" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <span>正在解析 STEP…</span>
+          </div>
+          <div id="drop-view" class="drop-view" hidden>松开鼠标，导入 STEP</div>
+          <canvas id="axes" class="axes" width="86" height="86" aria-hidden="true" hidden></canvas>
+        </div>
+
+        <footer class="viewport-footer">
+          <span id="model-info" class="model-info">单位 mm</span>
+          <span class="interaction-help"><svg class="icon" aria-hidden="true"><use href="#i-mouse"/></svg> 左键旋转 <span>·</span> 滚轮缩放 <span class="pan-help">· 右键平移</span></span>
+        </footer>
+      </section>
+
+      <aside class="inspector" aria-label="视角与导出设置">
+        <section class="panel" aria-labelledby="camera-heading">
+          <div class="panel-heading">
+            <svg class="icon" aria-hidden="true"><use href="#i-cube"/></svg>
+            <h2 id="camera-heading">视角</h2>
+          </div>
+          <div class="view-buttons" id="view-buttons">
+            <button class="view-button iso-button" type="button" data-view="iso" aria-pressed="true"><span>等轴测</span><small>ISO</small></button>
+            <button class="view-button" type="button" data-view="top" aria-pressed="false"><span>俯视</span><small>+Z</small></button>
+            <button class="view-button" type="button" data-view="bottom" aria-pressed="false"><span>仰视</span><small>−Z</small></button>
+            <button class="view-button" type="button" data-view="front" aria-pressed="false"><span>前视</span><small>−Y</small></button>
+            <button class="view-button" type="button" data-view="back" aria-pressed="false"><span>后视</span><small>+Y</small></button>
+            <button class="view-button" type="button" data-view="left" aria-pressed="false"><span>左视</span><small>−X</small></button>
+            <button class="view-button" type="button" data-view="right" aria-pressed="false"><span>右视</span><small>+X</small></button>
+          </div>
+        </section>
+
+        <section class="panel export-panel" aria-labelledby="export-heading">
+          <div class="panel-heading">
+            <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+            <h2 id="export-heading">导出图片</h2>
+          </div>
+
+          <fieldset>
+            <legend>格式</legend>
+            <div class="format-switch">
+              <label><input type="radio" name="format" value="png" checked><span>PNG</span></label>
+              <label><input type="radio" name="format" value="jpg"><span>JPG</span></label>
+            </div>
+          </fieldset>
+
+          <label class="field">尺寸
+            <select id="size-preset">
+              <option value="1920x1080">1920 × 1080 · 横向</option>
+              <option value="2048x2048">2048 × 2048 · 方形</option>
+              <option value="1080x1920">1080 × 1920 · 竖向</option>
+              <option value="3840x2160">3840 × 2160 · 4K</option>
+              <option value="custom">自定义</option>
+            </select>
+          </label>
+          <div class="size-fields" id="custom-size" hidden>
+            <label class="field">宽度（px）<input id="image-width" type="number" min="64" max="4096" step="1" value="1920"></label>
+            <span aria-hidden="true">×</span>
+            <label class="field">高度（px）<input id="image-height" type="number" min="64" max="4096" step="1" value="1080"></label>
+          </div>
+
+          <label class="field">背景
+            <select id="background">
+              <option value="transparent">透明</option>
+              <option value="white">白色</option>
+              <option value="dark">深色</option>
+            </select>
+          </label>
+
+          <div id="jpg-settings" class="quality-field" hidden>
+            <label for="quality">JPG 质量</label>
+            <output id="quality-value" for="quality">92%</output>
+            <input id="quality" type="range" min="10" max="100" step="1" value="92">
+          </div>
+
+          <button type="button" id="download" class="button button-primary" disabled>
+            <svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>
+            <span id="download-label">下载 PNG</span>
+          </button>
+          <p id="export-note" class="export-note">导出当前画面，无坐标轴和界面元素。</p>
+        </section>
+      </aside>
+
+    </div>
+  </main>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
